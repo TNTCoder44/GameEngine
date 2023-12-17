@@ -156,14 +156,13 @@ int main(int argc, char **argv)
         transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
         float scaleAmount = static_cast<float>(sin(glfwGetTime()));
         transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
+        
         shader.SetUniformMat4("transform", transform);
-
         renderer.Draw(vao, ibo, shader);
 
-        ImGui::Begin("Framerate");
-        ImGui::Text("Average framerate: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::End();
-
+        // draw ImGui
+        // renderer.OnImGuiRender();
+ 
         // render ImGui
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
