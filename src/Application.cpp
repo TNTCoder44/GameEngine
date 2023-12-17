@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     glfwMakeContextCurrent(window);
 
     // wait for vsync
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     // Set Window Icon
     SetWindowIcon(window, "../res/icons/window.png");
@@ -121,9 +121,6 @@ int main(int argc, char **argv)
     texture1.Unbind();
     texture2.Unbind();
 
-    float offset = 0.0f;
-    float increment = 0.001f;
-
     float mixValue = 0.2f;
 
     // main loop
@@ -131,6 +128,14 @@ int main(int argc, char **argv)
     {
         // check for input
         renderer.processInput(window, mixValue);
+
+        // init ImGui
+        ImGui_ImplGlfwGL3_NewFrame();
+
+        // transform position
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        transform = glm::rotate(transform, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
 
         /* start rendering */
         // clear background
@@ -143,10 +148,23 @@ int main(int argc, char **argv)
         shader.SetUniform1i("texture1", 0);
         shader.SetUniform1i("texture2", 1);
         shader.SetUniform1f("mixValue", mixValue);
+        shader.SetUniformMat4("transform", transform);
         renderer.Draw(vao, ibo, shader);
 
+        // second transform
+        transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+        float scaleAmount = static_cast<float>(sin(glfwGetTime()));
+        transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
+        shader.SetUniformMat4("transform", transform);
+
+        renderer.Draw(vao, ibo, shader);
+
+        ImGui::Begin("Framerate");
+        ImGui::Text("Average framerate: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+
         // render ImGui
-        ImGui_ImplGlfwGL3_NewFrame();
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 
