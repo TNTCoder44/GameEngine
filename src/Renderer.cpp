@@ -46,11 +46,13 @@ void Renderer::OnImGuiRender()
 
 void Renderer::processInput(GLFWwindow* window, float& mixValue)
 {
+    // Window closing
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
     }
 
+    // Texture colors
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
         mixValue += 0.001f;
@@ -64,4 +66,16 @@ void Renderer::processInput(GLFWwindow* window, float& mixValue)
         if (mixValue <= 0.0f)
             mixValue = 0.0f;
     }
+
+    // Camera
+    const float cameraSpeed = static_cast<float>(2.5 * deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }

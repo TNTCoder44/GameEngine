@@ -20,6 +20,7 @@ Texture::Texture(const std::string &path, bool flipVertically, GLuint type, GLui
 	GLCall(glTexParameteri(type, GL_TEXTURE_MIN_FILTER, minFilter));
 	GLCall(glTexParameteri(type, GL_TEXTURE_MAG_FILTER, magFilter));
 	GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_S, drawMethod));
+	
 	GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_T, drawMethod));
 
 	if (type == GL_TEXTURE_2D)
