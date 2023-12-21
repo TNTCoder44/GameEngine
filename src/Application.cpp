@@ -54,8 +54,10 @@ int main(int argc, char **argv)
     glfwSwapInterval(1);
 
     // Set Window Icon
+#ifdef _WIN32
     SetWindowIcon(window, "../res/icons/window.png");
-
+#endif
+    
     // init glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
