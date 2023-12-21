@@ -2,10 +2,11 @@
 
 void GlClearError()
 {
-    while (glGetError != GL_NO_ERROR);
+    while (glGetError != GL_NO_ERROR)
+        ;
 }
 
-bool GlLogCall(const char* function, const char* file, int line)
+bool GlLogCall(const char *function, const char *file, int line)
 {
     while (GLenum error = glGetError())
     {
@@ -16,21 +17,21 @@ bool GlLogCall(const char* function, const char* file, int line)
     return true;
 }
 
-void Renderer::Clear(const glm::vec4& color) const
+void Renderer::Clear(const glm::vec4 &color) const
 {
     glClearColor(color.x, color.y, color.z, color.w);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
+void Renderer::Draw(const VertexArray &va, const IndexBuffer &ib, const Shader &shader) const
 {
     shader.Bind();
     va.Bind();
-	ib.Bind();
+    ib.Bind();
     GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::Draw(const VertexArray& va, const Shader& shader, unsigned int count) const
+void Renderer::Draw(const VertexArray &va, const Shader &shader, unsigned int count) const
 {
     shader.Bind();
     va.Bind();
@@ -44,7 +45,7 @@ void Renderer::OnImGuiRender()
     ImGui::End();
 }
 
-void Renderer::processInput(GLFWwindow* window, float& mixValue)
+void Renderer::processInput(GLFWwindow *window, float &mixValue)
 {
     // Window closing
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -53,12 +54,12 @@ void Renderer::processInput(GLFWwindow* window, float& mixValue)
     }
 
     // Texture colors
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-	{
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
         mixValue += 0.001f;
         if (mixValue >= 1.0f)
             mixValue = 1.0f;
-	}
+    }
 
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
@@ -68,14 +69,12 @@ void Renderer::processInput(GLFWwindow* window, float& mixValue)
     }
 
     // Camera
-    const float cameraSpeed = static_cast<float>(2.5 * deltaTime);
-
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }

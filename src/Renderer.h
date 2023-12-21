@@ -5,10 +5,10 @@
 #include <GLFW/glfw3.h>
 
 #include <imgui/imgui.h>
-
-#include "IndexBuffer.h"
-#include "Shader.h"
+#include "Renderer.h"
 #include "VertexArray.h"
+#include "Shader.h"
+#include "IndexBuffer.h"
 #include "Globals.h"
 
 #ifdef _WIN32
@@ -42,17 +42,10 @@
 void GlClearError();
 bool GlLogCall(const char *function, const char *file, int line);
 
-inline void mouse_callback(GLFWwindow *window, double xpos, double ypos)
-{
-    static float lastX = WINDOW_WIDTH / 2.0f;
-    static float lastY = WINDOW_HEIGHT / 2.0f;
+inline Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-    if (firstMouse)
-    {
-        lastX = static_cast<float>(xpos);
-        lastY = static_cast<float>(ypos);
-        firstMouse = false;
-    }
+/*inline void mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
 
     float xoffset = static_cast<float>(xpos) - lastX;
     float yoffset = lastY - static_cast<float>(ypos); // reversed since y-coordinates go from bottom to top
@@ -77,6 +70,35 @@ inline void mouse_callback(GLFWwindow *window, double xpos, double ypos)
     front.y = sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
+}*/
+
+inline void mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    float lastX = static_cast<float>(WINDOW_WIDTH / 2);
+    float lastY = static_cast<float>(WINDOW_HEIGHT / 2);
+
+    float xPos = static_cast<float>(xpos);
+    float yPos = static_cast<float>(ypos);
+
+    if (firstMouse)
+    {
+        lastX = xPos;
+        lastY = yPos;
+        firstMouse = false;
+    }
+
+    float xoffset = xPos - lastX;
+    float yoffset = lastY - yPos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xPos;
+    lastY = yPos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+inline void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 inline void framebuffer_size_callback(GLFWwindow *window, int width, int height)

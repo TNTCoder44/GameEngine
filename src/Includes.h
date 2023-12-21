@@ -19,7 +19,6 @@
 
 #include "stb/stb_image.h"
 
-#include "Renderer.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
@@ -27,6 +26,8 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Icon.h"
+
+#include "Globals.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"

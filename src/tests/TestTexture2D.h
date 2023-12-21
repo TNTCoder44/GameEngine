@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Test.h"
-#include "../Renderer.h"
 
 #include <imgui/imgui.h>
 
 #include "../Texture.h"
 #include "../VertexBufferLayout.h"
 #include "../VertexBuffer.h"
+#include "../Renderer.h"
 
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
@@ -37,7 +37,6 @@ namespace test
 		Renderer m_Renderer;
 
 		glm::mat4 m_Proj, m_View;
-		glm::vec3 m_TranslationA, m_TranslationB; 
-
+		glm::vec3 m_TranslationA, m_TranslationB;
 	};
 }

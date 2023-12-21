@@ -34,6 +34,9 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+
     // handle resizing
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -41,11 +44,11 @@ int main(int argc, char **argv)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
 
+    // handle scrolling input
+    glfwSetScrollCallback(window, scroll_callback);
+
     // uncomment to set window fullscreen resolution
     // glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 1920, 1080, 280);
-
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
 
     // wait for vsync
     glfwSwapInterval(1);
@@ -156,8 +159,6 @@ int main(int argc, char **argv)
     texture1.Bind(0);
     texture2.Bind(1);
 
-    // Camera
-
     // Positions
     layout.Push<float>(3, GL_FALSE);
     // Colors
@@ -182,7 +183,7 @@ int main(int argc, char **argv)
     // main loop
     while (!glfwWindowShouldClose(window))
     {
-        // Camera
+        // calculate time logic
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -200,11 +201,11 @@ int main(int argc, char **argv)
         // calculate position
         // view matrix
         glm::mat4 view = glm::mat4(1.0f);
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = camera.GetViewMatrix();
 
         // projection matrix
         glm::mat4 proj = glm::mat4(1.0f);
-        proj = glm::perspective(glm::radians(45.0f),
+        proj = glm::perspective(glm::radians(camera.Zoom),
                                 static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT),
                                 0.1f, 100.0f);
 
