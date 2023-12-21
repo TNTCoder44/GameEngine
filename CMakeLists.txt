@@ -58,7 +58,6 @@ add_executable(PixelEngine
 )
 elseif(APPLE)
 add_executable(PixelEngine
-    MACOSX_BUNDLE
     ${SRC}
     ${SOURCES_GLAD})
 else()
