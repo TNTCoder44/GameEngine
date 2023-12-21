@@ -47,11 +47,6 @@ inline Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 /*inline void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 {
 
-    float xoffset = static_cast<float>(xpos) - lastX;
-    float yoffset = lastY - static_cast<float>(ypos); // reversed since y-coordinates go from bottom to top
-    lastX = static_cast<float>(xpos);
-    lastY = static_cast<float>(ypos);
-
     float sensitivity = 0.1f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
@@ -77,21 +72,18 @@ inline void mouse_callback(GLFWwindow *window, double xpos, double ypos)
     float lastX = static_cast<float>(WINDOW_WIDTH / 2);
     float lastY = static_cast<float>(WINDOW_HEIGHT / 2);
 
-    float xPos = static_cast<float>(xpos);
-    float yPos = static_cast<float>(ypos);
-
     if (firstMouse)
     {
-        lastX = xPos;
-        lastY = yPos;
+        lastX = xpos;
+        lastY = ypos;
         firstMouse = false;
     }
 
-    float xoffset = xPos - lastX;
-    float yoffset = lastY - yPos; // reversed since y-coordinates go from bottom to top
+    float xoffset = static_cast<float>(xpos) - lastX;
+    float yoffset = lastY - static_cast<float>(ypos); // reversed since y-coordinates go from bottom to top
 
-    lastX = xPos;
-    lastY = yPos;
+    lastX = static_cast<float>(xpos);
+    lastY = static_cast<float>(ypos);
 
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
