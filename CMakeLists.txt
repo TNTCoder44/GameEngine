@@ -50,10 +50,22 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*")
 file(GLOB_RECURSE SOURCES_GLAD CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/include/glad/*")
 
+if (WIN32)
 add_executable(PixelEngine
+    WIN32
     "${SRC}" 
     "${SOURCES_GLAD}" 
 )
+elseif(APPLE)
+add_executable(PixelEngine
+    MACOSX_BUNDLE
+    ${SRC}
+    ${SOURCES_GLAD})
+else()
+add_executable(PixelEngine
+    ${SRC}
+    ${SOURCES_GLAD})
+endif()
 
 target_link_libraries(PixelEngine PRIVATE ${OPENGL_LIBRARIES} glfw)
 target_link_libraries(PixelEngine PRIVATE assimp)
