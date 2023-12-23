@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 
 #include <imgui/imgui.h>
-#include "Renderer.h"
 #include "VertexArray.h"
 #include "Shader.h"
 #include "IndexBuffer.h"

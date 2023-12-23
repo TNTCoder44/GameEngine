@@ -10,7 +10,7 @@
 #endif
 
 #ifdef __linux__
-#include <malloc/malloc.h>
+#include <malloc.h>
 #endif
 
 Shader::Shader(const std::string &vertexSource, const std::string &fragmentSource, const std::string &geometrySource)
