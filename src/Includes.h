@@ -27,6 +27,8 @@
 #include "Texture.h"
 #include "Icon.h"
 
+#include "Vertices.h"
+
 #include "Globals.h"
 
 #include "imgui/imgui.h"
