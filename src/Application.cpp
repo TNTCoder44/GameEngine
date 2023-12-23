@@ -78,8 +78,10 @@ int main(int argc, char **argv)
     GLCall(glEnable(GL_DEPTH_TEST));
 
     // Shaders
-    Shader shader("../res/shaders/shader.vert", "../res/shaders/shader.frag", "");
-    shader.Bind();
+    Shader lightningShader("../res/shaders/shader.vert", "../res/shaders/shader.frag", "");
+    Shader lightCubeShader("../res/shaders/light_cube.vert", "../res/shaders/light_cube.frag", "");
+    lightningShader.Bind();
+    lightCubeShader.Bind();
 
     // VertexArray, VertexBuffer, IndexBuffer
     VertexArray vao;
@@ -109,17 +111,25 @@ int main(int argc, char **argv)
 
     vao.AddBuffer(vbo, layout);
 
+    VertexArray lightVao;
+    lightVao.Bind();
+    lightVao.AddBuffer(vbo, layout);
+
     Renderer renderer;
 
     // unbind everything
     vao.Unbind();
+    lightVao.Unbind();
     vbo.Unbind();
     ibo.Unbind();
-    shader.Unbind();
+    lightningShader.Unbind();
+    lightCubeShader.Unbind();
     texture1.Unbind();
     texture2.Unbind();
 
     float mixValue = 0.2f;
+
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
     // main loop
     while (!glfwWindowShouldClose(window))
@@ -153,24 +163,32 @@ int main(int argc, char **argv)
         // render screen
         texture1.Bind(0);
         texture2.Bind(1);
-        shader.Bind();
-        shader.SetUniform1i("texture1", 0);
-        shader.SetUniform1i("texture2", 1);
-        shader.SetUniform1f("mixValue", mixValue);
-        shader.SetUniformMat4("view", view);
-        shader.SetUniformMat4("projection", proj);
+        lightningShader.Bind();
+        lightningShader.SetUniform1i("texture1", 0);
+        lightningShader.SetUniform1i("texture2", 1);
+        lightningShader.SetUniform1f("mixValue", mixValue);
+        lightningShader.SetUniformMat4("view", view);
+        lightningShader.SetUniformMat4("projection", proj);
+        lightningShader.SetUniform3f("objectColor", {1.0f, 0.5f, 0.31f});
+        lightningShader.SetUniform3f("lightColor", {1.0f, 1.0f, 1.0f});
 
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            // calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            angle = glfwGetTime() * 25.0f;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            shader.SetUniformMat4("model", model);
-            renderer.Draw(vao, shader, 36);
-        }
+        glm::mat4 model = glm::mat4(1.0f);
+        lightningShader.SetUniformMat4("model", model);
+        renderer.Draw(vao, lightningShader, 36);
+
+        lightCubeShader.Bind();
+        lightCubeShader.SetUniform1i("texture1", 0);
+        lightCubeShader.SetUniform1i("texture2", 1);
+        lightCubeShader.SetUniform1f("mixValue", mixValue);
+        lightCubeShader.SetUniformMat4("view", view);
+        lightCubeShader.SetUniformMat4("projection", proj);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.5f)); 
+        lightCubeShader.SetUniformMat4("model", model);
+
+        renderer.Draw(lightVao, lightCubeShader, 36);
 
         // draw ImGui
         // renderer.OnImGuiRender();
@@ -185,9 +203,11 @@ int main(int argc, char **argv)
     }
 
     vao.Delete();
+    lightVao.Delete();
     vbo.Delete();
     ibo.Delete();
-    shader.Delete();
+    lightningShader.Delete();
+    lightCubeShader.Delete();
     texture1.Delete();
     texture2.Delete();
 
