@@ -41,7 +41,7 @@
 void GlClearError();
 bool GlLogCall(const char *function, const char *file, int line);
 
-inline Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+inline Camera camera(glm::vec3(0.0, 0.0, 3.0));
 
 inline float lastX = static_cast<float>(WINDOW_WIDTH / 2);
 inline float lastY = static_cast<float>(WINDOW_HEIGHT / 2);

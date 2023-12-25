@@ -6,6 +6,8 @@
 
 #include "Includes.h"
 
+#include <memory>
+
 int main(int argc, char **argv)
 {
     GLFWwindow *window;
@@ -87,7 +89,8 @@ int main(int argc, char **argv)
     VertexArray vao;
     VertexBuffer vbo(vertices, sizeof(vertices));
     IndexBuffer ibo(indices, sizeof(indices));
-    VertexBufferLayout layout;
+    VertexBufferLayout CubeLayout;
+    VertexBufferLayout LightcubeLayout;
 
     vao.Bind();
     vbo.Bind();
@@ -103,17 +106,25 @@ int main(int argc, char **argv)
     texture2.Bind(1);
 
     // Positions
-    layout.Push<float>(3, GL_FALSE);
+    CubeLayout.Push<float>(3, GL_FALSE);
     // Colors
-    layout.Push<float>(3, GL_FALSE);
+    CubeLayout.Push<float>(3, GL_FALSE);
     // Textures
-    layout.Push<float>(2, GL_FALSE);
+    CubeLayout.Push<float>(2, GL_FALSE);
+    // Normal Vectors
+    CubeLayout.Push<float>(3, GL_FALSE);
 
-    vao.AddBuffer(vbo, layout);
+    vao.AddBuffer(vbo, CubeLayout);
 
     VertexArray lightVao;
+    VertexBuffer lightVbo(LightCubeVertices, sizeof(LightCubeVertices));
     lightVao.Bind();
-    lightVao.AddBuffer(vbo, layout);
+    lightVbo.Bind();
+
+    // Positions
+    LightcubeLayout.Push<float>(3, GL_FALSE);
+
+    lightVao.AddBuffer(lightVbo, LightcubeLayout);
 
     Renderer renderer;
 
@@ -121,6 +132,7 @@ int main(int argc, char **argv)
     vao.Unbind();
     lightVao.Unbind();
     vbo.Unbind();
+    lightVbo.Unbind();
     ibo.Unbind();
     lightningShader.Unbind();
     lightCubeShader.Unbind();
@@ -129,11 +141,15 @@ int main(int argc, char **argv)
 
     float mixValue = 0.2f;
 
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-
     // main loop
     while (!glfwWindowShouldClose(window))
     {
+        // set light position
+        float lightX = 2.0f * sin(glfwGetTime());
+        float lightY = 0.15f;
+        float lightZ = 1.5f * cos(glfwGetTime());
+        glm::vec3 lightPos = glm::vec3(lightX, lightY, lightZ);
+
         // calculate time logic
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -171,21 +187,19 @@ int main(int argc, char **argv)
         lightningShader.SetUniformMat4("projection", proj);
         lightningShader.SetUniform3f("objectColor", {1.0f, 0.5f, 0.31f});
         lightningShader.SetUniform3f("lightColor", {1.0f, 1.0f, 1.0f});
+        lightningShader.SetUniform3f("lightPos", lightPos);
 
         glm::mat4 model = glm::mat4(1.0f);
         lightningShader.SetUniformMat4("model", model);
         renderer.Draw(vao, lightningShader, 36);
 
         lightCubeShader.Bind();
-        lightCubeShader.SetUniform1i("texture1", 0);
-        lightCubeShader.SetUniform1i("texture2", 1);
-        lightCubeShader.SetUniform1f("mixValue", mixValue);
         lightCubeShader.SetUniformMat4("view", view);
         lightCubeShader.SetUniformMat4("projection", proj);
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.5f)); 
+        model = glm::scale(model, glm::vec3(0.2f));
         lightCubeShader.SetUniformMat4("model", model);
 
         renderer.Draw(lightVao, lightCubeShader, 36);
