@@ -11,6 +11,8 @@
 
 #include "Includes.h"
 
+irrklang::ISoundEngine *engine = irrklang::createIrrKlangDevice();
+
 int main(int argc, char **argv)
 {
     GLFWwindow *window;
@@ -193,16 +195,16 @@ int main(int argc, char **argv)
         lightningShader.SetUniform1f("mixValue", mixValue);
 
         lightningShader.SetUniformMat4("view", view);
-    	lightningShader.SetUniformMat4("projection", proj);
+        lightningShader.SetUniformMat4("projection", proj);
 
-    	lightningShader.SetUniform3f("viewPos", camera.Position);
+        lightningShader.SetUniform3f("viewPos", camera.Position);
 
-    	lightningShader.SetUniform3f("material.ambient", ambientColor);
+        lightningShader.SetUniform3f("material.ambient", ambientColor);
         lightningShader.SetUniform3f("material.diffuse", diffuseColor);
         lightningShader.SetUniform3f("material.specular", {1.0f, 1.0f, 1.0f});
         lightningShader.SetUniform1f("material.shininess", 32.0f);
 
-    	lightningShader.SetUniform3f("light.position", lightPos);
+        lightningShader.SetUniform3f("light.position", lightPos);
         lightningShader.SetUniform3f("light.ambient", {1.0f, 1.0f, 1.0f});
         lightningShader.SetUniform3f("light.diffuse", {1.0f, 1.0f, 1.0f});
         lightningShader.SetUniform3f("light.specular", {1.0f, 1.0f, 1.0f});
