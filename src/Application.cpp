@@ -146,7 +146,7 @@ int main(int argc, char **argv)
     {
         // set light position
         float lightX = 2.0f * sin(glfwGetTime());
-        float lightY = 0.15f;
+        float lightY = 2.0f * sin(glfwGetTime());
         float lightZ = 1.5f * cos(glfwGetTime());
         glm::vec3 lightPos = glm::vec3(lightX, lightY, lightZ);
 
@@ -188,6 +188,7 @@ int main(int argc, char **argv)
         lightningShader.SetUniform3f("objectColor", {1.0f, 0.5f, 0.31f});
         lightningShader.SetUniform3f("lightColor", {1.0f, 1.0f, 1.0f});
         lightningShader.SetUniform3f("lightPos", lightPos);
+        lightningShader.SetUniform3f("viewPos", camera.Position);
 
         glm::mat4 model = glm::mat4(1.0f);
         lightningShader.SetUniformMat4("model", model);
