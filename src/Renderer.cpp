@@ -23,19 +23,19 @@ void Renderer::Clear(const glm::vec4 &color) const
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::Draw(const VertexArray &va, const IndexBuffer &ib, const Shader &shader) const
+void Renderer::Draw(const VertexArray &va, const IndexBuffer &ib, unsigned int type, const Shader &shader) const
 {
     shader.Bind();
     va.Bind();
     ib.Bind();
-    GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+    GLCall(glDrawElements(type, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::Draw(const VertexArray &va, const Shader &shader, unsigned int count) const
+void Renderer::Draw(const VertexArray &va, const Shader &shader, unsigned int type, unsigned int count) const
 {
     shader.Bind();
     va.Bind();
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, count));
+    GLCall(glDrawArrays(type, 0, count));
 }
 
 void Renderer::OnImGuiRender()
@@ -45,7 +45,7 @@ void Renderer::OnImGuiRender()
     ImGui::End();
 }
 
-void Renderer::processInput(GLFWwindow *window, float &mixValue)
+void Renderer::processInput(GLFWwindow *window)
 {
     // Window closing
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)

@@ -16,6 +16,8 @@
 #include <sstream>
 #include <vector>
 #include <utility>
+#include <memory>
+#include <cmath>
 
 #include "stb/stb_image.h"
 

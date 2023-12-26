@@ -1,3 +1,8 @@
+/*
+    Created by Janis.
+    2023
+*/
+
 #ifdef _WIN32
 #ifndef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
@@ -5,8 +10,6 @@
 #endif
 
 #include "Includes.h"
-
-#include <memory>
 
 int main(int argc, char **argv)
 {
@@ -90,7 +93,7 @@ int main(int argc, char **argv)
     VertexBuffer vbo(vertices, sizeof(vertices));
     IndexBuffer ibo(indices, sizeof(indices));
     VertexBufferLayout CubeLayout;
-    VertexBufferLayout LightcubeLayout;
+    VertexBufferLayout LightCubeLayout;
 
     vao.Bind();
     vbo.Bind();
@@ -116,30 +119,29 @@ int main(int argc, char **argv)
 
     vao.AddBuffer(vbo, CubeLayout);
 
+    vao.Unbind();
+    vbo.Unbind();
+
     VertexArray lightVao;
     VertexBuffer lightVbo(LightCubeVertices, sizeof(LightCubeVertices));
     lightVao.Bind();
     lightVbo.Bind();
 
     // Positions
-    LightcubeLayout.Push<float>(3, GL_FALSE);
+    LightCubeLayout.Push<float>(3, GL_FALSE);
 
-    lightVao.AddBuffer(lightVbo, LightcubeLayout);
+    lightVao.AddBuffer(lightVbo, LightCubeLayout);
 
     Renderer renderer;
 
     // unbind everything
-    vao.Unbind();
     lightVao.Unbind();
-    vbo.Unbind();
     lightVbo.Unbind();
     ibo.Unbind();
     lightningShader.Unbind();
     lightCubeShader.Unbind();
     texture1.Unbind();
     texture2.Unbind();
-
-    float mixValue = 0.2f;
 
     // main loop
     while (!glfwWindowShouldClose(window))
@@ -150,13 +152,19 @@ int main(int argc, char **argv)
         float lightZ = 1.5f * cos(glfwGetTime());
         glm::vec3 lightPos = glm::vec3(lightX, lightY, lightZ);
 
+        // calculate the light color
+        glm::vec3 lightColor = glm::vec3(1.0f);
+
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+
         // calculate time logic
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         // check for input
-        renderer.processInput(window, mixValue);
+        renderer.processInput(window);
 
         // init ImGui
         ImGui_ImplGlfwGL3_NewFrame();
@@ -183,17 +191,27 @@ int main(int argc, char **argv)
         lightningShader.SetUniform1i("texture1", 0);
         lightningShader.SetUniform1i("texture2", 1);
         lightningShader.SetUniform1f("mixValue", mixValue);
+
         lightningShader.SetUniformMat4("view", view);
-        lightningShader.SetUniformMat4("projection", proj);
-        lightningShader.SetUniform3f("objectColor", {1.0f, 0.5f, 0.31f});
-        lightningShader.SetUniform3f("lightColor", {1.0f, 1.0f, 1.0f});
-        lightningShader.SetUniform3f("lightPos", lightPos);
-        lightningShader.SetUniform3f("viewPos", camera.Position);
+    	lightningShader.SetUniformMat4("projection", proj);
+
+    	lightningShader.SetUniform3f("viewPos", camera.Position);
+
+    	lightningShader.SetUniform3f("material.ambient", ambientColor);
+        lightningShader.SetUniform3f("material.diffuse", diffuseColor);
+        lightningShader.SetUniform3f("material.specular", {1.0f, 1.0f, 1.0f});
+        lightningShader.SetUniform1f("material.shininess", 32.0f);
+
+    	lightningShader.SetUniform3f("light.position", lightPos);
+        lightningShader.SetUniform3f("light.ambient", {1.0f, 1.0f, 1.0f});
+        lightningShader.SetUniform3f("light.diffuse", {1.0f, 1.0f, 1.0f});
+        lightningShader.SetUniform3f("light.specular", {1.0f, 1.0f, 1.0f});
 
         glm::mat4 model = glm::mat4(1.0f);
         lightningShader.SetUniformMat4("model", model);
-        renderer.Draw(vao, lightningShader, 36);
+        renderer.Draw(vao, lightningShader, GL_TRIANGLES, 36);
 
+        // Lamp
         lightCubeShader.Bind();
         lightCubeShader.SetUniformMat4("view", view);
         lightCubeShader.SetUniformMat4("projection", proj);
@@ -203,7 +221,7 @@ int main(int argc, char **argv)
         model = glm::scale(model, glm::vec3(0.2f));
         lightCubeShader.SetUniformMat4("model", model);
 
-        renderer.Draw(lightVao, lightCubeShader, 36);
+        renderer.Draw(lightVao, lightCubeShader, GL_TRIANGLES, 36);
 
         // draw ImGui
         // renderer.OnImGuiRender();
@@ -220,6 +238,7 @@ int main(int argc, char **argv)
     vao.Delete();
     lightVao.Delete();
     vbo.Delete();
+    lightVbo.Delete();
     ibo.Delete();
     lightningShader.Delete();
     lightCubeShader.Delete();

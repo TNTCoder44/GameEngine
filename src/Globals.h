@@ -13,4 +13,4 @@ inline bool firstMouse = true;
 inline float deltaTime = 0.0f;
 inline float lastFrame = 0.0f;
 
-
+inline float mixValue = 0.2f;
