@@ -17,6 +17,7 @@
 #include <vector>
 #include <utility>
 #include <memory>
+#include <thread>
 #include <cmath>
 
 #include "stb/stb_image.h"

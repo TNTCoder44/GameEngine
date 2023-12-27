@@ -7,7 +7,6 @@
 
 #include <string>
 #include <iostream>
-#include <thread>
 
 class SoundEngine {
 public:
@@ -15,7 +14,7 @@ public:
     ~SoundEngine();
 
     void LoadSound(const char* filePath);
-    void PlaySoundAsync(const char* filePath);
+    void PlaySound(const char* filePath);
 
 private:
     ALCdevice* device;
