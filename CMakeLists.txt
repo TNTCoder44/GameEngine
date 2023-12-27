@@ -72,6 +72,7 @@ endif()
 target_link_libraries(PixelEngine PRIVATE ${OPENGL_LIBRARIES} glfw)
 target_link_libraries(PixelEngine PRIVATE assimp)
 target_link_libraries(PixelEngine PRIVATE ${FREETYPE_LIBRARIES})
+target_link_libraries(PixelEngine PRIVATE OpenAL)
 
 target_include_directories(PixelEngine
     PRIVATE

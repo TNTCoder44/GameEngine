@@ -6,8 +6,6 @@
 #include <assimp/Bitmap.h>
 #include <ft2build.h>
 
-#include <AL/al.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -30,6 +28,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Icon.h"
+#include "SoundEngine.h"
 
 #include "Vertices.h"
 
