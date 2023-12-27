@@ -70,6 +70,8 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    SoundEngine soundEngine;
+
     // initialize ImGui
     ImGui::CreateContext();
     ImGui_ImplGlfwGL3_Init(window, true);
@@ -146,6 +148,8 @@ int main(int argc, char **argv)
     // main loop
     while (!glfwWindowShouldClose(window))
     {
+        soundEngine.PlaySoundAsync("../res/sounds/sound.wav");
+
         // set light position
         float lightX = 2.0f * sin(glfwGetTime());
         float lightY = 2.0f * sin(glfwGetTime());
