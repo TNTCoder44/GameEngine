@@ -69,10 +69,6 @@ else() # Linux and Apple
     endif()
 endif()
 
-if(APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -arch x86_64")
-endif()
-
 if (WIN32)
 add_executable(PixelEngine
     WIN32
@@ -94,14 +90,17 @@ target_link_libraries(PixelEngine PRIVATE assimp)
 target_link_libraries(PixelEngine PRIVATE ${FREETYPE_LIBRARIES})
 
 if(WIN32)
+    target_link_directories(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/ikpFlac.dll")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/ikpMP3.dll")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/irrKlang.dll")
 elseif(APPLE)
+    target_link_directories(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/ikpFLAC.dylib")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/ikpMP3.dylib")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/libirrklang.dylib")
 elseif(UNIX AND NOT APPLE)
+    target_link_directories(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/ikpFlac.so")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/ikpMP3.so")
     target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/libIrrKlang.so")

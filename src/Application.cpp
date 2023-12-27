@@ -11,8 +11,6 @@
 
 #include "Includes.h"
 
-irrklang::ISoundEngine *engine = irrklang::createIrrKlangDevice();
-
 int main(int argc, char **argv)
 {
     GLFWwindow *window;
