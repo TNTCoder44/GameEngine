@@ -50,24 +50,8 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*")
 file(GLOB_RECURSE SOURCES_GLAD CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/include/glad/*")
 
-# irrKlang
-if(WIN32)
-    if(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
-        set(irrKlang_DIR "${CMAKE_SOURCE_DIR}/Libraries/irrKlang/irrKlang-64bit")
-    elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")
-        set(irrKlang_DIR "${CMAKE_SOURCE_DIR}/Libraries/irrKlang/irrKlang-32bit")
-    else()
-        message(FATAL_ERROR "Unbekannte Plattform!")
-    endif()
-else() # Linux and Apple
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)  # x64
-        set(irrKlang_DIR "${CMAKE_SOURCE_DIR}/Libraries/irrKlang/irrKlang-64bit")
-    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)  # x86
-        set(irrKlang_DIR "${CMAKE_SOURCE_DIR}/Libraries/irrKlang/irrKlang-32bit")
-    else()
-        message(FATAL_ERROR "Unbekannte Plattform!")
-    endif()
-endif()
+# OpenAl
+add_subdirectory("Libraries/openal")
 
 if (WIN32)
 add_executable(PixelEngine
@@ -89,29 +73,12 @@ target_link_libraries(PixelEngine PRIVATE ${OPENGL_LIBRARIES} glfw)
 target_link_libraries(PixelEngine PRIVATE assimp)
 target_link_libraries(PixelEngine PRIVATE ${FREETYPE_LIBRARIES})
 
-if(WIN32)
-    target_link_directories(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/ikpFlac.dll")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/ikpMP3.dll")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/win-visualStudio/irrKlang.dll")
-elseif(APPLE)
-    target_link_directories(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/ikpFLAC.dylib")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/ikpMP3.dylib")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/macosx-gcc/libirrklang.dylib")
-elseif(UNIX AND NOT APPLE)
-    target_link_directories(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/ikpFlac.so")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/ikpMP3.so")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${irrKlang_DIR}/bin/linux-gcc/libIrrKlang.so")
-endif()
-
 target_include_directories(PixelEngine
     PRIVATE
     "Libraries/include/"
     "src/vendor/"
     "Libraries/freetype/include/"
-    "${irrKlang_DIR}/include/"
+    "Libraries/openal/include/"
 )
 
 if (WIN32)
