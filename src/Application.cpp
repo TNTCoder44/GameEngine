@@ -27,6 +27,11 @@ int main(int argc, char **argv)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
+    // initialize ImGui
+    ImGui::CreateContext();
+    ImGui_ImplGlfwGL3_Init(window, true);
+    ImGui::StyleColorsDark();
+
     // find primary monitor
     auto *monitor = glfwGetPrimaryMonitor();
 
@@ -42,12 +47,18 @@ int main(int argc, char **argv)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    // error handling
+    glfwSetErrorCallback([](int error, const char* description) {
+        fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+    });
+
     // handle resizing
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // handle mouse input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // handle scrolling input
     glfwSetScrollCallback(window, scroll_callback);
@@ -69,14 +80,7 @@ int main(int argc, char **argv)
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-
-    SoundEngine soundEngine;
-
-    // initialize ImGui
-    ImGui::CreateContext();
-    ImGui_ImplGlfwGL3_Init(window, true);
-    ImGui::StyleColorsDark();
-
+    
     /* start coding */
 
     // GLCall(glEnable(GL_BLEND));
@@ -128,6 +132,8 @@ int main(int argc, char **argv)
     VertexBuffer lightVbo(LightCubeVertices, sizeof(LightCubeVertices));
     lightVao.Bind();
     lightVbo.Bind();
+
+    
 
     // Positions
     LightCubeLayout.Push<float>(3, GL_FALSE);

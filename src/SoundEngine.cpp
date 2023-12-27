@@ -69,19 +69,26 @@ void SoundEngine::LoadSound(const char *filePath)
 
 void SoundEngine::PlaySound(const char *filePath)
 {
-    // Lade den sound
     LoadSound(filePath);
 
-    // Verknüpfe die Soundquelle mit dem Puffer
     alSourcei(source, AL_BUFFER, buffer);
 
-    // Starte die Wiedergabe
     alSourcePlay(source);
 
-    // Warte, bis die Wiedergabe beendet ist
     ALint state;
     do
     {
         alGetSourcei(source, AL_SOURCE_STATE, &state);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Kurze Verzögerung
     } while (state == AL_PLAYING);
 }
+
+void SoundEngine::AsyncPlay(const char *filePath)
+{
+    std::thread soundThread([this, filePath]() {
+        PlaySound(filePath);
+    });
+
+    soundThread.detach();
+}
+

@@ -89,6 +89,9 @@
     "locale": "cpp",
     "queue": "cpp",
     "stack": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "__tree": "cpp",
+    "csignal": "cpp",
+    "future": "cpp"
   }
 }

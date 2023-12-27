@@ -7,12 +7,18 @@
 
 #include <string>
 #include <iostream>
+#include <thread>
+#include <chrono>
+#include <functional>
 
 class SoundEngine {
 public:
     SoundEngine();
     ~SoundEngine();
 
+    void AsyncPlay(const char* filePath);
+
+protected:
     void LoadSound(const char* filePath);
     void PlaySound(const char* filePath);
 
@@ -22,4 +28,5 @@ private:
 
     ALuint buffer;
     ALuint source;
+    
 };
