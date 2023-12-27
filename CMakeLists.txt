@@ -53,6 +53,9 @@ file(GLOB_RECURSE SOURCES_GLAD CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Li
 # OpenAl
 add_subdirectory("Libraries/openal")
 
+# libsndfile
+add_subdirectory("Libraries/libsndfile")
+
 if (WIN32)
 add_executable(PixelEngine
     WIN32
@@ -73,6 +76,7 @@ target_link_libraries(PixelEngine PRIVATE ${OPENGL_LIBRARIES} glfw)
 target_link_libraries(PixelEngine PRIVATE assimp)
 target_link_libraries(PixelEngine PRIVATE ${FREETYPE_LIBRARIES})
 target_link_libraries(PixelEngine PRIVATE OpenAL)
+target_link_libraries(PixelEngine PRIVATE sndfile)
 
 target_include_directories(PixelEngine
     PRIVATE
@@ -80,6 +84,7 @@ target_include_directories(PixelEngine
     "src/vendor/"
     "Libraries/freetype/include/"
     "Libraries/openal/include/"
+    "Libraries/libsndfile/include/"
 )
 
 if (WIN32)
