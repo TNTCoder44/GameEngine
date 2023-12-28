@@ -2,33 +2,38 @@
 
 #include <stb/stb_image.h>
 
-Texture::Texture(const std::string &path, bool flipVertically, GLuint type, GLuint format, GLuint drawMethod,
-				 GLuint minFilter, GLuint magFilter, const int &desiredChannels)
+Texture::Texture(const std::string &path, bool flipVertically, GLuint drawMethod,
+				 GLuint minFilter, GLuint magFilter, int desiredChannels)
 	: m_RendererID(0), m_FilePath(path), m_LocalBuffer(nullptr),
-	  m_Width(0), m_Height(0), m_BPP(0), m_Type(type)
+	  m_Width(0), m_Height(0), m_BPP(),
+	  m_DesiredChannels(desiredChannels)
 {
 	if (flipVertically)
 	{
 		stbi_set_flip_vertically_on_load(1);
 	}
 
-	m_LocalBuffer = stbi_load(path.c_str(), &m_Width, &m_Height, &m_BPP, desiredChannels);
+	m_LocalBuffer = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &m_BPP, m_DesiredChannels);
+
+	GLenum format;
+	if (m_BPP == 1)
+		format = GL_RED;
+	else if (m_BPP == 3)
+		format = GL_RGB;
+	else if (m_BPP == 4)
+		format = GL_RGBA;
 
 	GLCall(glGenTextures(1, &m_RendererID));
-	GLCall(glBindTexture(type, m_RendererID));
+	GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
 
-	GLCall(glTexParameteri(type, GL_TEXTURE_MIN_FILTER, minFilter));
-	GLCall(glTexParameteri(type, GL_TEXTURE_MAG_FILTER, magFilter));
-	GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_S, drawMethod));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, drawMethod));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, drawMethod));
+
+	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_LocalBuffer));
 	
-	GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_T, drawMethod));
-
-	if (type == GL_TEXTURE_2D)
-	{
-		GLCall(glTexImage2D(type, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_LocalBuffer));
-	}
-
-	glGenerateMipmap(type);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	if (m_LocalBuffer)
 	{
@@ -48,12 +53,12 @@ Texture::~Texture()
 void Texture::Bind(unsigned int slot) const
 {
 	GLCall(glActiveTexture(GL_TEXTURE0 + slot));
-	GLCall(glBindTexture(m_Type, m_RendererID));
+	GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
 }
 
 void Texture::Unbind() const
 {
-	GLCall(glBindTexture(m_Type, 0));
+	GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 void Texture::Delete() const

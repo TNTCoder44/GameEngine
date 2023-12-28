@@ -8,12 +8,11 @@ private:
 	unsigned int m_RendererID;
 	std::string m_FilePath;
 	unsigned char* m_LocalBuffer;
-	int m_Width, m_Height, m_BPP;
-	GLuint m_Type;
+	int m_Width, m_Height, m_BPP, m_DesiredChannels;
 
 public:
-	Texture(const std::string& path, bool flipVertically,GLuint type, GLuint format, GLuint drawMethod, 
-			GLuint minFilter, GLuint magFilter, const int& desiredChannels);
+	Texture(const std::string& path, bool flipVertically, GLuint drawMethod, 
+			GLuint minFilter, GLuint magFilter, int desiredChannels);
 	~Texture();
 
 	void Bind(unsigned int slot) const;

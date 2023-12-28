@@ -39,7 +39,7 @@ namespace test
 		m_Shader->Bind();
 		m_Shader->SetUniform4f("u_Color", glm::vec4(0.8f, 0.3f, 0.8f, 1.0f));
 
-		m_Texture = std::make_unique<Texture>("../res/textures/image.png", true, GL_TEXTURE_2D, GL_RGBA, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, 4);
+		m_Texture = std::make_unique<Texture>("../res/textures/image.png", true, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, 4);
 		m_Shader->SetUniform1i("u_Texture", 0);
 	}
 

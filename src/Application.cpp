@@ -48,9 +48,8 @@ int main(int argc, char **argv)
     glfwMakeContextCurrent(window);
 
     // error handling
-    glfwSetErrorCallback([](int error, const char* description) {
-        fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-    });
+    glfwSetErrorCallback([](int error, const char *description)
+                         { fprintf(stderr, "GLFW Error %d: %s\n", error, description); });
 
     // handle resizing
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -58,7 +57,7 @@ int main(int argc, char **argv)
     // handle mouse input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    // glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // handle scrolling input
     glfwSetScrollCallback(window, scroll_callback);
@@ -80,7 +79,7 @@ int main(int argc, char **argv)
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     /* start coding */
 
     // GLCall(glEnable(GL_BLEND));
@@ -106,13 +105,13 @@ int main(int argc, char **argv)
     ibo.Bind();
 
     // Textures
-    Texture texture1("../res/textures/container.jpg", false, GL_TEXTURE_2D,
-                     GL_RGB, GL_REPEAT, GL_LINEAR, GL_LINEAR, 0);
-    Texture texture2("../res/textures/awesomeface.png", true, GL_TEXTURE_2D,
-                     GL_RGBA, GL_REPEAT, GL_LINEAR, GL_LINEAR, 0);
+    Texture diffuseMap("../res/textures/container2.png", false,
+                    GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
+    Texture specularMap("../res/textures/container2_specular.png", false,
+                    GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
 
-    texture1.Bind(0);
-    texture2.Bind(1);
+    diffuseMap.Bind(0);
+    specularMap.Bind(1);
 
     // Positions
     CubeLayout.Push<float>(3, GL_FALSE);
@@ -133,8 +132,6 @@ int main(int argc, char **argv)
     lightVao.Bind();
     lightVbo.Bind();
 
-    
-
     // Positions
     LightCubeLayout.Push<float>(3, GL_FALSE);
 
@@ -148,8 +145,8 @@ int main(int argc, char **argv)
     ibo.Unbind();
     lightningShader.Unbind();
     lightCubeShader.Unbind();
-    texture1.Unbind();
-    texture2.Unbind();
+    diffuseMap.Unbind();
+    specularMap.Unbind();
 
     // main loop
     while (!glfwWindowShouldClose(window))
@@ -193,11 +190,11 @@ int main(int argc, char **argv)
                                 0.1f, 100.0f);
 
         // render screen
-        texture1.Bind(0);
-        texture2.Bind(1);
+        diffuseMap.Bind(0);
+        specularMap.Bind(1);
         lightningShader.Bind();
-        lightningShader.SetUniform1i("texture1", 0);
-        lightningShader.SetUniform1i("texture2", 1);
+        lightningShader.SetUniform1i("material.diffuse", 0);
+        lightningShader.SetUniform1i("material.specular", 1);
         lightningShader.SetUniform1f("mixValue", mixValue);
 
         lightningShader.SetUniformMat4("view", view);
@@ -205,14 +202,11 @@ int main(int argc, char **argv)
 
         lightningShader.SetUniform3f("viewPos", camera.Position);
 
-        lightningShader.SetUniform3f("material.ambient", ambientColor);
-        lightningShader.SetUniform3f("material.diffuse", diffuseColor);
-        lightningShader.SetUniform3f("material.specular", {1.0f, 1.0f, 1.0f});
-        lightningShader.SetUniform1f("material.shininess", 32.0f);
+        lightningShader.SetUniform1f("material.shininess", 64.0f);
 
         lightningShader.SetUniform3f("light.position", lightPos);
-        lightningShader.SetUniform3f("light.ambient", {1.0f, 1.0f, 1.0f});
-        lightningShader.SetUniform3f("light.diffuse", {1.0f, 1.0f, 1.0f});
+        lightningShader.SetUniform3f("light.ambient", ambientColor);
+        lightningShader.SetUniform3f("light.diffuse", diffuseColor);
         lightningShader.SetUniform3f("light.specular", {1.0f, 1.0f, 1.0f});
 
         glm::mat4 model = glm::mat4(1.0f);
@@ -250,8 +244,8 @@ int main(int argc, char **argv)
     ibo.Delete();
     lightningShader.Delete();
     lightCubeShader.Delete();
-    texture1.Delete();
-    texture2.Delete();
+    diffuseMap.Delete();
+    specularMap.Delete();
 
     ImGui_ImplGlfwGL3_Shutdown();
     ImGui::DestroyContext();

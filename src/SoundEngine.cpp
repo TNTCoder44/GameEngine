@@ -37,7 +37,7 @@ SoundEngine::~SoundEngine()
     alcCloseDevice(device);
 }
 
-void SoundEngine::LoadSound(const char *filePath)
+void SoundEngine::LoadWAV(const char *filePath)
 {
     SNDFILE *sndfile;
     SF_INFO sfinfo;
@@ -62,9 +62,32 @@ void SoundEngine::LoadSound(const char *filePath)
     // Schließe die Sounddatei
     sf_close(sndfile);
 
-    alBufferData(buffer, AL_FORMAT_MONO16, membuf, size * sizeof(short), freq);
+    alBufferData(buffer, AL_FORMAT_STEREO16, membuf, size * sizeof(short), freq);
 
     delete[] membuf;
+}
+
+void SoundEngine::LoadSound(const char* filePath)
+{
+    std::string fileExtension = GetFileExtension(std::string(filePath));
+    if (fileExtension == "wav")
+    {
+        LoadWAV(filePath);
+    }
+    else if (fileExtension == "mp3")
+    {
+        std::cout << "MP3 file format not supported" << std::endl;
+    }
+}
+
+std::string SoundEngine::GetFileExtension(const std::string& filePath)
+{
+    size_t dotPos = filePath.find_last_of('.');
+    if (dotPos != std::string::npos && dotPos + 1 < filePath.length())
+    {
+        return filePath.substr(dotPos + 1);
+    }
+    return "";
 }
 
 void SoundEngine::PlaySound(const char *filePath)
