@@ -9,40 +9,51 @@
 #endif
 #endif
 
+#ifdef __APPLE__
+#define OS_MACOS
+#elif __linux__
+#define OS_LINUX
+#elif _WIN32
+#define OS_WINDOWS
+#endif
+
 #include "Includes.h"
 
 int main(int argc, char **argv)
 {
-    GLFWwindow *window;
-
     /* Initialize GLFW */
     if (!glfwInit())
         return -1;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+#ifdef OS_MACOS
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+#else
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#endif
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    // initialize ImGui
-    ImGui::CreateContext();
-    ImGui_ImplGlfwGL3_Init(window, true);
-    ImGui::StyleColorsDark();
-
     // find primary monitor
     auto *monitor = glfwGetPrimaryMonitor();
 
-    /* Create a windowed mode window and its OpenGL context */
+    // Create window
+    // Create a windowed mode window and its OpenGL context 
     // change monitor variable to monitor to get fullscreen resolution
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGl", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGl", nullptr, nullptr);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
+
+    // initialize ImGui
+    ImGui::CreateContext();
+    ImGui_ImplGlfwGL3_Init(window, true);
+    ImGui::StyleColorsDark();
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
@@ -57,7 +68,6 @@ int main(int argc, char **argv)
     // handle mouse input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
-    // glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // handle scrolling input
     glfwSetScrollCallback(window, scroll_callback);
@@ -106,11 +116,11 @@ int main(int argc, char **argv)
 
     // Textures
     Texture diffuseMap("../res/textures/container2.png", false,
-                    GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
+                       GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
     Texture specularMap("../res/textures/container2_specular.png", false,
-                    GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
+                        GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
     Texture emissionMap("../res/textures/mat.png", false,
-                    GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
+                        GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
 
     diffuseMap.Bind(0);
     specularMap.Bind(1);
@@ -193,7 +203,7 @@ int main(int argc, char **argv)
         proj = glm::perspective(glm::radians(camera.Zoom),
                                 static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT),
                                 0.1f, 100.0f);
-        
+
         // model matrix
         glm::mat4 model = glm::mat4(1.0f);
 
@@ -236,7 +246,7 @@ int main(int argc, char **argv)
             renderer.Draw(vao, lightningShader, GL_TRIANGLES, 36);
         }
 
-        // Lamp 
+        // Lamp
         /*
         lightCubeShader.Bind();
         lightCubeShader.SetUniformMat4("projection", proj);

@@ -5,7 +5,7 @@
 
 #include <sndfile.h>
 
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <thread>
 #include <chrono>
