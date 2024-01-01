@@ -109,9 +109,12 @@ int main(int argc, char **argv)
                     GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
     Texture specularMap("../res/textures/container2_specular.png", false,
                     GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
+    Texture emissionMap("../res/textures/mat.png", false,
+                    GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
 
     diffuseMap.Bind(0);
     specularMap.Bind(1);
+    emissionMap.Bind(2);
 
     // Positions
     CubeLayout.Push<float>(3, GL_FALSE);
@@ -147,6 +150,7 @@ int main(int argc, char **argv)
     lightCubeShader.Unbind();
     diffuseMap.Unbind();
     specularMap.Unbind();
+    emissionMap.Unbind();
 
     // main loop
     while (!glfwWindowShouldClose(window))
@@ -155,7 +159,8 @@ int main(int argc, char **argv)
         float lightX = 2.0f * sin(glfwGetTime());
         float lightY = 2.0f * sin(glfwGetTime());
         float lightZ = 1.5f * cos(glfwGetTime());
-        glm::vec3 lightPos = glm::vec3(lightX, lightY, lightZ);
+
+        glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
 
         // calculate the light color
         glm::vec3 lightColor = glm::vec3(1.0f);
@@ -188,13 +193,18 @@ int main(int argc, char **argv)
         proj = glm::perspective(glm::radians(camera.Zoom),
                                 static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT),
                                 0.1f, 100.0f);
+        
+        // model matrix
+        glm::mat4 model = glm::mat4(1.0f);
 
         // render screen
         diffuseMap.Bind(0);
         specularMap.Bind(1);
+        emissionMap.Bind(2);
         lightningShader.Bind();
         lightningShader.SetUniform1i("material.diffuse", 0);
         lightningShader.SetUniform1i("material.specular", 1);
+        lightningShader.SetUniform1i("material.emission", 2);
         lightningShader.SetUniform1f("mixValue", mixValue);
 
         lightningShader.SetUniformMat4("view", view);
@@ -204,24 +214,38 @@ int main(int argc, char **argv)
 
         lightningShader.SetUniform1f("material.shininess", 64.0f);
 
-        lightningShader.SetUniform3f("light.position", lightPos);
+        lightningShader.SetUniform3f("light.position", camera.Position);
+        lightningShader.SetUniform3f("light.direction", camera.Front);
+        lightningShader.SetUniform1f("light.cutOff", glm::cos(glm::radians(12.5f)));
+        lightningShader.SetUniform1f("light.outerCutOff", glm::cos(glm::radians(17.5f)));
         lightningShader.SetUniform3f("light.ambient", ambientColor);
         lightningShader.SetUniform3f("light.diffuse", diffuseColor);
         lightningShader.SetUniform3f("light.specular", {1.0f, 1.0f, 1.0f});
+        lightningShader.SetUniform1f("light.constant", 1.0f);
+        lightningShader.SetUniform1f("light.linear", 0.09f);
+        lightningShader.SetUniform1f("light.quadratic", 0.032f);
 
-        glm::mat4 model = glm::mat4(1.0f);
-        lightningShader.SetUniformMat4("model", model);
-        renderer.Draw(vao, lightningShader, GL_TRIANGLES, 36);
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            lightningShader.SetUniformMat4("model", model);
 
-        // Lamp
+            renderer.Draw(vao, lightningShader, GL_TRIANGLES, 36);
+        }
+
+        // Lamp 
+        /*
         lightCubeShader.Bind();
-        lightCubeShader.SetUniformMat4("view", view);
         lightCubeShader.SetUniformMat4("projection", proj);
-
+        lightCubeShader.SetUniformMat4("view", view);
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
         lightCubeShader.SetUniformMat4("model", model);
+        */
 
         renderer.Draw(lightVao, lightCubeShader, GL_TRIANGLES, 36);
 
@@ -246,6 +270,7 @@ int main(int argc, char **argv)
     lightCubeShader.Delete();
     diffuseMap.Delete();
     specularMap.Delete();
+    emissionMap.Delete();
 
     ImGui_ImplGlfwGL3_Shutdown();
     ImGui::DestroyContext();
