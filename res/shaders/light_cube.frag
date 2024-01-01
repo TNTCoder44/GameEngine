@@ -1,5 +1,9 @@
 #version 410 core
 
+#if __VERSION__ >= 430
+    #version 430 core
+#endif
+
 out vec4 FragColor;
 
 void main()

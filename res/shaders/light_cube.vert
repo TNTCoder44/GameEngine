@@ -1,4 +1,8 @@
 #version 410 core  
+
+#if __VERSION__ >= 430
+    #version 430 core
+#endif
            
 layout(location = 0) in vec3 aPos;
 
