@@ -35,11 +35,10 @@ add_subdirectory("Libraries/GLFW/")
 add_library(glfw3 SHARED IMPORTED)
 
 # assimp
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
+set(BUILD_SHARED_LIBS ON)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Assimp build tests" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "Assimp install" FORCE)
 set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "Assimp install PDB" FORCE)
-
 add_subdirectory("Libraries/assimp")
 
 # freetype
@@ -72,11 +71,16 @@ add_executable(PixelEngine
     ${SOURCES_GLAD})
 endif()
 
-target_link_libraries(PixelEngine PRIVATE ${OPENGL_LIBRARIES} glfw)
+target_link_libraries(PixelEngine PRIVATE ${OPENGL_LIBRARIES})
+target_link_libraries(PixelEngine PRIVATE glfw)
 target_link_libraries(PixelEngine PRIVATE assimp)
 target_link_libraries(PixelEngine PRIVATE ${FREETYPE_LIBRARIES})
 target_link_libraries(PixelEngine PRIVATE OpenAL)
 target_link_libraries(PixelEngine PRIVATE sndfile)
+if(APPLE)
+    target_link_libraries(PixelEngine PRIVATE "-framework OpenGL")
+endif()
+
 
 target_include_directories(PixelEngine
     PRIVATE
