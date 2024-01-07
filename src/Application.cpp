@@ -90,7 +90,9 @@ int main(int argc, char **argv)
     Shader lightCubeShader("../res/shaders/lighting/light_cube.vert", "../res/shaders/lighting/light_cube.frag", "");
     Shader modelShader("../res/shaders/modeling/model.vert", "../res/shaders/modeling/model.frag", "");
 
+    stbi_set_flip_vertically_on_load(1);
     Model backpack("../res/textures/backpack/backpack.obj");
+    stbi_set_flip_vertically_on_load(0);
 
     // VertexArray, VertexBuffer, IndexBuffer
     VertexArray vao;
@@ -197,6 +199,8 @@ int main(int argc, char **argv)
         // model matrix
         glm::mat4 model = glm::mat4(1.0f);
 
+        // render screen
+
         // Model
         modelShader.Bind();
         model = glm::mat4(1.0f);
@@ -207,8 +211,15 @@ int main(int argc, char **argv)
         modelShader.SetUniformMat4("model", model);
 
         modelShader.SetUniform3f("viewPos", camera.Position);
-        modelShader.SetUniform3f("light.position", pointLightPositions[0]);
-        modelShader.SetUniform3f("light.color", pointLightColors[0]);
+
+        modelShader.SetUniform3f("pointLight.position", pointLightPositions[0]);
+        modelShader.SetUniform1f("pointLight.constant", 1.0f);
+        modelShader.SetUniform1f("pointLight.linear", 0.09f);
+        modelShader.SetUniform1f("pointLight.quadratic", 0.032f);
+        modelShader.SetUniform3f("pointLight.ambient", (pointLightColors[0] * glm::vec3(0.1f) - 0.03f));
+        modelShader.SetUniform3f("pointLight.diffuse", pointLightColors[0]);
+        modelShader.SetUniform3f("pointLight.specular", {1.0f, 1.0f, 1.0f});
+
         modelShader.SetUniform3f("spotLight.position", camera.Position);
         modelShader.SetUniform3f("spotLight.direction", camera.Front);
         modelShader.SetUniform1f("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
@@ -219,9 +230,14 @@ int main(int argc, char **argv)
         modelShader.SetUniform3f("spotLight.ambient", {0.0f, 0.0f, 0.0f});
         modelShader.SetUniform3f("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
         modelShader.SetUniform3f("spotLight.specular", {1.0f, 1.0f, 1.0f});
+
+        modelShader.SetUniform3f("dirLight.direction", {-0.2f, -1.0f, -0.3f});
+        modelShader.SetUniform3f("dirLight.ambient", {0.05f, 0.05f, 0.05f});
+        modelShader.SetUniform3f("dirLight.diffuse", {0.4f, 0.4f, 0.4f});
+        modelShader.SetUniform3f("dirLight.specular", {0.5f, 0.5f, 0.5f});
         backpack.Draw(modelShader);
 
-        // render screen
+        // Cubes
         diffuseMap.Bind(0);
         specularMap.Bind(1);
         emissionMap.Bind(2);
