@@ -11,6 +11,10 @@
 #include "Globals.h"
 #include "SoundEngine.h"
 
+/*
+    #define _DEBUG
+*/
+
 #ifdef _WIN32
 #define ASSERT(x) \
     if (!(x))     \
@@ -29,12 +33,13 @@
         ;
 #endif
 
+#ifndef __APPLE__
 #ifndef _DEBUG
 #define GLCall(x)   \
     GlClearError(); \
     x;              \
     ASSERT(GlLogCall(#x, __FILE__, __LINE__));
-
+#endif
 #else
 #define GLCall(x) x;
 #endif
@@ -47,6 +52,12 @@ inline SoundEngine soundEngine;
 
 inline float lastX = static_cast<float>(WINDOW_WIDTH / 2);
 inline float lastY = static_cast<float>(WINDOW_HEIGHT / 2);
+
+#ifdef _DEBUG
+inline bool debug_mode = true;
+#else
+inline bool debug_mode = false;
+#endif
 
 inline void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 {
@@ -75,7 +86,6 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        std::cout << "i was here" << std::endl;
         soundEngine.AsyncPlay("../res/sounds/sound.wav");
     }
 }

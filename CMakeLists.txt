@@ -34,6 +34,15 @@ endif()
 add_subdirectory("Libraries/GLFW/")
 add_library(glfw3 SHARED IMPORTED)
 
+# OpenAl
+add_subdirectory("Libraries/openal")
+
+# libsndfile
+add_subdirectory("Libraries/libsndfile")
+
+# freetype
+add_subdirectory("Libraries/freetype")
+
 # assimp
 set(BUILD_SHARED_LIBS ON)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Assimp build tests" FORCE)
@@ -41,19 +50,10 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "Assimp install" FORCE)
 set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "Assimp install PDB" FORCE)
 add_subdirectory("Libraries/assimp")
 
-# freetype
-add_subdirectory("Libraries/freetype")
-
 set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*")
 file(GLOB_RECURSE SOURCES_GLAD CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/include/glad/*")
-
-# OpenAl
-add_subdirectory("Libraries/openal")
-
-# libsndfile
-add_subdirectory("Libraries/libsndfile")
 
 if (WIN32)
 add_executable(PixelEngine

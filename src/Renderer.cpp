@@ -40,9 +40,12 @@ void Renderer::Draw(const VertexArray &va, const Shader &shader, unsigned int ty
 
 void Renderer::OnImGuiRender()
 {
-    ImGui::Begin("Framerate");
-    ImGui::Text("Average framerate: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
+    if (debug_mode)
+    {
+        ImGui::Begin("Framerate");
+        ImGui::Text("Average framerate: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+    }
 }
 
 void Renderer::processInput(GLFWwindow *window)

@@ -34,6 +34,7 @@ int main(int argc, char **argv)
     GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGl", nullptr, nullptr);
     if (!window)
     {
+        std::cerr << "Failed to create a GLFW window!\n";
         glfwTerminate();
         return -1;
     }
@@ -312,7 +313,7 @@ int main(int argc, char **argv)
         }
 
         // draw ImGui
-        // renderer.OnImGuiRender();
+        renderer.OnImGuiRender();
 
         // render imgui
         ImGui::Render();
