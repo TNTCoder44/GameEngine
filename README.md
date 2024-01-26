@@ -1,6 +1,9 @@
-# GameEngine
+# Multiplatform OpenGL GameEngine
 
-### Multiplatform Game engine
+## prequisites
+
+You need to have python installed, and PYTHON_EXECUTABLE set for this to work.
+And of course you need to have cmake, and a c/c++ compiler. For Windows I highly recommend to use Visual Studio build tools. For MacOS and Linux I highly recommend gnu make to compile it(Not Xcode! It will be very messy!).
 
 ## Build
 
