@@ -24,3 +24,5 @@ make
 ```
 
 It can be more complicated on winodws for example.
+
+Have fun with it!
