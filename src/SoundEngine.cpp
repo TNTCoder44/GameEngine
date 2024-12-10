@@ -1,3 +1,4 @@
+#ifndef _WIN32
 #include "SoundEngine.h"
 
 SoundEngine::SoundEngine()
@@ -115,3 +116,4 @@ void SoundEngine::AsyncPlay(const char *filePath)
     soundThread.detach();
 }
 
+#endif
