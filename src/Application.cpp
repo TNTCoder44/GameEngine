@@ -3,6 +3,7 @@
     2023
 */
 
+#include "Renderer.h"
 #ifdef _WIN32
 #ifndef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
@@ -57,6 +58,7 @@ int main(int argc, char **argv)
     // handle mouse input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // handle scrolling input
     glfwSetScrollCallback(window, scroll_callback);
@@ -154,7 +156,7 @@ int main(int argc, char **argv)
     diffuseMap.Unbind();
     specularMap.Unbind();
     emissionMap.Unbind();
-
+    
     // main loop
     while (!glfwWindowShouldClose(window))
     {
