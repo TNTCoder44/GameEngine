@@ -10,19 +10,24 @@ And of course you need to have cmake, and a c/c++ compiler. For Windows I highly
 Compile the project with:
 
 ```bash
-mkdir build && cd build
-cmake ..
+./build.sh
 ```
 
 It will generate a platform-specific build system for your project.
 
-To compile it for example with linux makefiles:
-
+run
+```bash
+./run.sh
+```
+or directly:
 ```bash
 cd build
-make
+./PixelEngine
 ```
+NOTE: You need to be in the build directory or else it won't find the shader files.
 
 It can be more complicated on winodws for example.
+I haven't tried my build script on windows - it maybe even works, try it out.
+Else just compile it by hand as noted in #Prequisites.
 
 Have fun with it!
