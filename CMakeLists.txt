@@ -35,8 +35,9 @@ add_subdirectory("Libraries/GLFW/")
 add_library(glfw3 SHARED IMPORTED)
 
 # OpenAl
+if (NOT WIN32)
 add_subdirectory("Libraries/openal")
-
+endif()
 # libsndfile
 add_subdirectory("Libraries/libsndfile")
 
@@ -77,19 +78,30 @@ target_link_libraries(PixelEngine PRIVATE ${OPENGL_LIBRARIES})
 target_link_libraries(PixelEngine PRIVATE glfw)
 target_link_libraries(PixelEngine PRIVATE assimp)
 target_link_libraries(PixelEngine PRIVATE ${FREETYPE_LIBRARIES})
+if(NOT WIN32)
 target_link_libraries(PixelEngine PRIVATE OpenAL)
+endif()
 target_link_libraries(PixelEngine PRIVATE sndfile)
 if(APPLE)
     target_link_libraries(PixelEngine PRIVATE "-framework OpenGL")
 endif()
 
+if(WIN32)
+add_custom_command(TARGET PixelEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_BINARY_DIR}/Libraries/assimp/bin/assimp-vc143-mt.dll"
+    "${CMAKE_BINARY_DIR}/assimp-vc143-mt.dll"
+)
+endif()
 
 target_include_directories(PixelEngine
     PRIVATE
     "Libraries/include/"
     "src/vendor/"
     "Libraries/freetype/include/"
+    if(NOT WIN32)
     "Libraries/openal/include/"
+    endif()
     "Libraries/libsndfile/include/"
 )
 
