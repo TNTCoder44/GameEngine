@@ -9,8 +9,9 @@
 #include "Shader.h"
 #include "IndexBuffer.h"
 #include "Globals.h"
+#ifndef _WIN32
 #include "SoundEngine.h"
-
+#endif
 /*
     #define _DEBUG
 */
@@ -48,7 +49,10 @@ void GlClearError();
 bool GlLogCall(const char *function, const char *file, int line);
 
 inline Camera camera(glm::vec3(0.0, 0.0, 3.0));
+
+#ifndef _WIN32
 inline SoundEngine soundEngine;
+#endif
 
 inline float lastX = static_cast<float>(WINDOW_WIDTH / 2);
 inline float lastY = static_cast<float>(WINDOW_HEIGHT / 2);
@@ -86,7 +90,11 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
+#ifndef _WIN32
         soundEngine.AsyncPlay("../res/sounds/sound.wav");
+#else
+        printf("Sadly no Sound in Windows yet..");
+#endif
     }
 }
 
