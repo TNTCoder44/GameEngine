@@ -81,6 +81,13 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+    {
+        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return -1;
+    }
+
     /* start coding */
 
     // GLCall(glEnable(GL_BLEND));
