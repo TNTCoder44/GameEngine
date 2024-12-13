@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 #ifdef __APPLE__
     int fdWidth, fdHeight;
     glfwGetFramebufferSize(window, &fdWidth, &fdHeight);
-#elif
+#else
     int fdWidth = WINDOW_WIDTH;
     int fdHeight = WINDOW_HEIGHT;
 #endif
