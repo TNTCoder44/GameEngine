@@ -5,8 +5,8 @@
 
 #include "Camera.h"
 
-inline constexpr int WINDOW_WIDTH = 1000;
-inline constexpr int WINDOW_HEIGHT = 800;
+inline constexpr int WINDOW_WIDTH = 1200;
+inline constexpr int WINDOW_HEIGHT = 1000;
 
 inline bool firstMouse = true;
 

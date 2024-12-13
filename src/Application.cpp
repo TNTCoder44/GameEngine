@@ -1,9 +1,11 @@
 /*
     Created by Janis.
-    2023
+    2023 - 2024
 */
 
+#include "Camera.h"
 #include "Renderer.h"
+
 #ifdef _WIN32
 #ifndef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
@@ -151,6 +153,61 @@ int main(int argc, char **argv)
 
     lightVao.AddBuffer(lightVbo, LightCubeLayout);
 
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+
+    Shader screenShader("../res/shaders/lighting/fb.vert", "../res/shaders/lighting/fb.frag", "");
+
+    // screen quad VAO
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    
+    lightningShader.Bind();
+    lightningShader.SetUniform1i("texture1", 0);
+
+    screenShader.Bind();
+    screenShader.SetUniform1i("screenTexture", 0);
+
+    // framebuffer configuration
+    // -------------------------
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    // create a color attachment texture
+    unsigned int textureColorbuffer;
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     Renderer renderer;
 
     // unbind everything
@@ -163,7 +220,9 @@ int main(int argc, char **argv)
     diffuseMap.Unbind();
     specularMap.Unbind();
     emissionMap.Unbind();
-    
+    screenShader.Unbind();
+   
+    /*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
     // main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -193,7 +252,9 @@ int main(int argc, char **argv)
 
         /* start rendering */
         // clear background
-        renderer.Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glEnable(GL_DEPTH_TEST);
+        renderer.Clear(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
 
         // calculate position
         // view matrix
@@ -212,40 +273,40 @@ int main(int argc, char **argv)
         // render screen
 
         // Model
-        modelShader.Bind();
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(3.0f, 0.0f, 7.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        modelShader.SetUniformMat4("view", view);
-        modelShader.SetUniformMat4("projection", proj);
-        modelShader.SetUniformMat4("model", model);
-
-        modelShader.SetUniform3f("viewPos", camera.Position);
-
-        modelShader.SetUniform3f("pointLight.position", pointLightPositions[0]);
-        modelShader.SetUniform1f("pointLight.constant", 1.0f);
-        modelShader.SetUniform1f("pointLight.linear", 0.09f);
-        modelShader.SetUniform1f("pointLight.quadratic", 0.032f);
-        modelShader.SetUniform3f("pointLight.ambient", (pointLightColors[0] * glm::vec3(0.1f) - 0.03f));
-        modelShader.SetUniform3f("pointLight.diffuse", pointLightColors[0]);
-        modelShader.SetUniform3f("pointLight.specular", {1.0f, 1.0f, 1.0f});
-
-        modelShader.SetUniform3f("spotLight.position", camera.Position);
-        modelShader.SetUniform3f("spotLight.direction", camera.Front);
-        modelShader.SetUniform1f("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        modelShader.SetUniform1f("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-        modelShader.SetUniform1f("spotLight.constant", 1.0f);
-        modelShader.SetUniform1f("spotLight.linear", 0.09f);
-        modelShader.SetUniform1f("spotLight.quadratic", 0.032f);
-        modelShader.SetUniform3f("spotLight.ambient", {0.0f, 0.0f, 0.0f});
-        modelShader.SetUniform3f("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
-        modelShader.SetUniform3f("spotLight.specular", {1.0f, 1.0f, 1.0f});
-
-        modelShader.SetUniform3f("dirLight.direction", {-0.2f, -1.0f, -0.3f});
-        modelShader.SetUniform3f("dirLight.ambient", {0.05f, 0.05f, 0.05f});
-        modelShader.SetUniform3f("dirLight.diffuse", {0.4f, 0.4f, 0.4f});
-        modelShader.SetUniform3f("dirLight.specular", {0.5f, 0.5f, 0.5f});
-        backpack.Draw(modelShader);
+        /*modelShader.Bind();*/
+        /*model = glm::mat4(1.0f);*/
+        /*model = glm::translate(model, glm::vec3(3.0f, 0.0f, 7.0f));*/
+        /*model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));*/
+        /*modelShader.SetUniformMat4("view", view);*/
+        /*modelShader.SetUniformMat4("projection", proj);*/
+        /*modelShader.SetUniformMat4("model", model);*/
+        /**/
+        /*modelShader.SetUniform3f("viewPos", camera.Position);*/
+        /**/
+        /*modelShader.SetUniform3f("pointLight.position", pointLightPositions[0]);*/
+        /*modelShader.SetUniform1f("pointLight.constant", 1.0f);*/
+        /*modelShader.SetUniform1f("pointLight.linear", 0.09f);*/
+        /*modelShader.SetUniform1f("pointLight.quadratic", 0.032f);*/
+        /*modelShader.SetUniform3f("pointLight.ambient", (pointLightColors[0] * glm::vec3(0.1f) - 0.03f));*/
+        /*modelShader.SetUniform3f("pointLight.diffuse", pointLightColors[0]);*/
+        /*modelShader.SetUniform3f("pointLight.specular", {1.0f, 1.0f, 1.0f});*/
+        /**/
+        /*modelShader.SetUniform3f("spotLight.position", camera.Position);*/
+        /*modelShader.SetUniform3f("spotLight.direction", camera.Front);*/
+        /*modelShader.SetUniform1f("spotLight.cutOff", glm::cos(glm::radians(12.5f)));*/
+        /*modelShader.SetUniform1f("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));*/
+        /*modelShader.SetUniform1f("spotLight.constant", 1.0f);*/
+        /*modelShader.SetUniform1f("spotLight.linear", 0.09f);*/
+        /*modelShader.SetUniform1f("spotLight.quadratic", 0.032f);*/
+        /*modelShader.SetUniform3f("spotLight.ambient", {0.0f, 0.0f, 0.0f});*/
+        /*modelShader.SetUniform3f("spotLight.diffuse", {1.0f, 1.0f, 1.0f});*/
+        /*modelShader.SetUniform3f("spotLight.specular", {1.0f, 1.0f, 1.0f});*/
+        /**/
+        /*modelShader.SetUniform3f("dirLight.direction", {-0.2f, -1.0f, -0.3f});*/
+        /*modelShader.SetUniform3f("dirLight.ambient", {0.05f, 0.05f, 0.05f});*/
+        /*modelShader.SetUniform3f("dirLight.diffuse", {0.4f, 0.4f, 0.4f});*/
+        /*modelShader.SetUniform3f("dirLight.specular", {0.5f, 0.5f, 0.5f});*/
+        /*backpack.Draw(modelShader);*/
 
         // Cubes
         diffuseMap.Bind(0);
@@ -271,55 +332,66 @@ int main(int argc, char **argv)
         lightningShader.SetUniform3f("dirLight.specular", {0.5f, 0.5f, 0.5f});
 
         // point light
-        for (GLuint i = 0; i < 4; i++)
-        {
-            std::string number = std::to_string(i);
+        /*for (GLuint i = 0; i < 4; i++)*/
+        /*{*/
+        /*    std::string number = std::to_string(i);*/
+        /**/
+        /*    lightningShader.SetUniform3f("pointLights[" + number + "].position", pointLightPositions[i]);*/
+        /*    lightningShader.SetUniform3f("pointLights[" + number + "].ambient", (pointLightColors[i] * glm::vec3(0.1f) - 0.03f));*/
+        /*    lightningShader.SetUniform3f("pointLights[" + number + "].diffuse", pointLightColors[i]);*/
+        /*    lightningShader.SetUniform3f("pointLights[" + number + "].specular", {1.0f, 1.0f, 1.0f});*/
+        /*    lightningShader.SetUniform1f("pointLights[" + number + "].constant", 1.0f);*/
+        /*    lightningShader.SetUniform1f("pointLights[" + number + "].linear", 0.09f);*/
+        /*    lightningShader.SetUniform1f("pointLights[" + number + "].quadratic", 0.032f);*/
+        /*}*/
 
-            lightningShader.SetUniform3f("pointLights[" + number + "].position", pointLightPositions[i]);
-            lightningShader.SetUniform3f("pointLights[" + number + "].ambient", (pointLightColors[i] * glm::vec3(0.1f) - 0.03f));
-            lightningShader.SetUniform3f("pointLights[" + number + "].diffuse", pointLightColors[i]);
-            lightningShader.SetUniform3f("pointLights[" + number + "].specular", {1.0f, 1.0f, 1.0f});
-            lightningShader.SetUniform1f("pointLights[" + number + "].constant", 1.0f);
-            lightningShader.SetUniform1f("pointLights[" + number + "].linear", 0.09f);
-            lightningShader.SetUniform1f("pointLights[" + number + "].quadratic", 0.032f);
-        }
+        /*// spotLight*/
+        /*lightningShader.SetUniform3f("spotLight.position", camera.Position);*/
+        /*lightningShader.SetUniform3f("spotLight.direction", camera.Front);*/
+        /*lightningShader.SetUniform3f("spotLight.ambient", {0.0f, 0.0f, 0.0f});*/
+        /*lightningShader.SetUniform3f("spotLight.diffuse", {1.0f, 1.0f, 1.0f});*/
+        /*lightningShader.SetUniform3f("spotLight.specular", {1.0f, 1.0f, 1.0f});*/
+        /*lightningShader.SetUniform1f("spotLight.constant", 1.0f);*/
+        /*lightningShader.SetUniform1f("spotLight.linear", 0.09f);*/
+        /*lightningShader.SetUniform1f("spotLight.quadratic", 0.032f);*/
+        /*lightningShader.SetUniform1f("spotLight.cutOff", glm::cos(glm::radians(12.5f)));*/
+        /*lightningShader.SetUniform1f("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));*/
+        /**/
+        /*for (unsigned int i = 0; i < 10; i++)*/
+        /*{*/
+        /*    model = glm::mat4(1.0f);*/
+        /*    model = glm::translate(model, cubePositions[i]);*/
+        /*    float angle = 20.0f * i;*/
+        /*    model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));*/
+        /*    lightningShader.SetUniformMat4("model", model);*/
+        /**/
+        /*    renderer.Draw(vao, lightningShader, GL_TRIANGLES, 36);*/
+        /*}*/
 
-        // spotLight
-        lightningShader.SetUniform3f("spotLight.position", camera.Position);
-        lightningShader.SetUniform3f("spotLight.direction", camera.Front);
-        lightningShader.SetUniform3f("spotLight.ambient", {0.0f, 0.0f, 0.0f});
-        lightningShader.SetUniform3f("spotLight.diffuse", {1.0f, 1.0f, 1.0f});
-        lightningShader.SetUniform3f("spotLight.specular", {1.0f, 1.0f, 1.0f});
-        lightningShader.SetUniform1f("spotLight.constant", 1.0f);
-        lightningShader.SetUniform1f("spotLight.linear", 0.09f);
-        lightningShader.SetUniform1f("spotLight.quadratic", 0.032f);
-        lightningShader.SetUniform1f("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        lightningShader.SetUniform1f("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+        /*// Lamp*/
+        /*lightCubeShader.Bind();*/
+        /*lightCubeShader.SetUniformMat4("projection", proj);*/
+        /*lightCubeShader.SetUniformMat4("view", view);*/
+        /**/
+        /*for (unsigned int i = 0; i < 4; i++)*/
+        /*{*/
+        /*    model = glm::mat4(1.0f);*/
+        /*    model = glm::translate(model, pointLightPositions[i]);*/
+        /*    model = glm::scale(model, glm::vec3(0.2f));*/
+        /*    lightCubeShader.SetUniformMat4("model", model);*/
+        /*    renderer.Draw(lightVao, lightCubeShader, GL_TRIANGLES, 36);*/
+        /*}*/
 
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            lightningShader.SetUniformMat4("model", model);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
 
-            renderer.Draw(vao, lightningShader, GL_TRIANGLES, 36);
-        }
+        glClearColor(1.f, 1.f, 1.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-        // Lamp
-        lightCubeShader.Bind();
-        lightCubeShader.SetUniformMat4("projection", proj);
-        lightCubeShader.SetUniformMat4("view", view);
-
-        for (unsigned int i = 0; i < 4; i++)
-        {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, pointLightPositions[i]);
-            model = glm::scale(model, glm::vec3(0.2f));
-            lightCubeShader.SetUniformMat4("model", model);
-            renderer.Draw(lightVao, lightCubeShader, GL_TRIANGLES, 36);
-        }
+        screenShader.Bind();
+        glBindVertexArray(quadVAO);
+        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // draw ImGui
         renderer.OnImGuiRender();
@@ -338,6 +410,8 @@ int main(int argc, char **argv)
     vbo.Delete();
     lightVbo.Delete();
     ibo.Delete();
+    glDeleteFramebuffers(1, &framebuffer);
+    glDeleteRenderbuffers(1, &rbo);
     lightningShader.Delete();
     lightCubeShader.Delete();
     diffuseMap.Delete();
