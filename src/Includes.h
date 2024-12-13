@@ -30,6 +30,7 @@
 #include "Texture.h"
 #include "Icon.h"
 #include "Model.h"
+#include "FrameBuffer.h"
 
 #include "Vertices.h"
 

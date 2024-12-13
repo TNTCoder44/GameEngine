@@ -107,6 +107,7 @@ class Renderer
 {
 public:
     void Clear(const glm::vec4 &color) const;
+    void ClearColor(const glm::vec4& color) const;
     void Draw(const VertexArray &va, const IndexBuffer &ib, unsigned int type, const Shader &shader) const;
     void Draw(const VertexArray &va, const Shader &shader, unsigned int type, unsigned int count) const;
     void OnImGuiRender();
