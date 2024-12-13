@@ -156,7 +156,7 @@ int main(int argc, char **argv)
     // 
     // Framebuffer
     //
-    Shader screenShader("../res/shaders/lighting/fb.vert", "../res/shaders/lighting/fb.frag", "");
+    Shader screenShader("../res/shaders/test/fb.vert", "../res/shaders/test/fb.frag", "");
     
     VertexBufferLayout quadLayout;
 
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
         // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         framebuffer.Bind();
 
-        renderer.Clear({0.1f, 0.1f, 0.1f, 1.0f});
+        renderer.Clear({0.f, 0.f, 0.f, 1.0f});
 
         // calculate position
         // view matrix
