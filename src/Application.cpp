@@ -4,8 +4,6 @@
 */
 
 
-#include "FrameBuffer.h"
-#include "VertexBufferLayout.h"
 #ifdef _WIN32
 #ifndef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
