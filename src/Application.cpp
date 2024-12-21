@@ -4,13 +4,6 @@
 */
 
 
-<<<<<<< HEAD
-=======
-#include "FrameBuffer.h"
-#include "Renderer.h"
-#include "VertexBufferLayout.h"
-#include "Vertices.h"
->>>>>>> 29f5832 (added skybox)
 #ifdef _WIN32
 #ifndef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
