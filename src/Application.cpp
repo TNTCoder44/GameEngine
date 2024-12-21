@@ -4,6 +4,13 @@
 */
 
 
+<<<<<<< HEAD
+=======
+#include "FrameBuffer.h"
+#include "Renderer.h"
+#include "VertexBufferLayout.h"
+#include "Vertices.h"
+>>>>>>> 29f5832 (added skybox)
 #ifdef _WIN32
 #ifndef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
@@ -154,7 +161,7 @@ int main(int argc, char **argv)
     // 
     // Framebuffer
     //
-    Shader screenShader("../res/shaders/test/fb.vert", "../res/shaders/test/fb.frag", "");
+    Shader screenShader("../res/shaders/post/fb.vert", "../res/shaders/post/fb.frag", "");
     
     VertexBufferLayout quadLayout;
 
@@ -184,6 +191,31 @@ int main(int argc, char **argv)
 
     FrameBuffer framebuffer(fdWidth, fdHeight, GL_COLOR_ATTACHMENT0);
 
+    // Cubemap
+    
+    std::vector<std::string> texture_faces = {
+        "../res/textures/skybox/right.jpg",
+        "../res/textures/skybox/left.jpg",
+        "../res/textures/skybox/top.jpg",
+        "../res/textures/skybox/bottom.jpg",
+        "../res/textures/skybox/front.jpg",
+        "../res/textures/skybox/back.jpg"
+    };
+
+    Cubemap cubemap(texture_faces);
+    VertexArray skyboxVAO;
+    VertexBuffer skyboxVBO(skyboxVertices, sizeof(skyboxVertices));
+    VertexBufferLayout skyboxLayout;
+
+    skyboxLayout.Push<float>(3, GL_FALSE);
+
+    skyboxVAO.AddBuffer(skyboxVBO, skyboxLayout);
+    
+    Shader skyboxShader("../res/shaders/cubemap/cm.vert", "../res/shaders/cubemap/cm.frag", "");
+
+    skyboxShader.Bind();
+    skyboxShader.SetUniform1i("skybox", 0);
+    
     // Renderer 
     Renderer renderer;
 
@@ -198,7 +230,7 @@ int main(int argc, char **argv)
     specularMap.Unbind();
     emissionMap.Unbind();
     screenShader.Unbind();
-   
+     
     /*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
     // main loop
     while (!glfwWindowShouldClose(window))
@@ -238,6 +270,7 @@ int main(int argc, char **argv)
         // view matrix
         glm::mat4 view = glm::mat4(1.0f);
         view = camera.GetViewMatrix();
+       
 
         // projection matrix
         glm::mat4 proj = glm::mat4(1.0f);
@@ -360,9 +393,21 @@ int main(int argc, char **argv)
         modelShader.SetUniform3f("dirLight.specular", {0.5f, 0.5f, 0.5f});
         backpack.Draw(modelShader);
 
+        glDepthFunc(GL_LEQUAL);
+        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+        
+        skyboxShader.Bind();
+        skyboxShader.SetUniformMat4("view", view);
+        skyboxShader.SetUniformMat4("proj", proj);
+        skyboxShader.SetUniform1i("skybox", 0);
+        cubemap.Bind();
+        renderer.Draw(skyboxVAO, skyboxShader, GL_TRIANGLES, 36);
+        skyboxVAO.Unbind();
+        glDepthFunc(GL_LESS);
+
         // Draw framebuffer quad
         framebuffer.Unbind();
-    
+        
         renderer.ClearColor({1.f, 1.f, 1.f, 1.f});
 
         framebuffer.BindTexture();

@@ -31,6 +31,7 @@
 #include "Icon.h"
 #include "Model.h"
 #include "FrameBuffer.h"
+#include "Cubemap.h"
 
 #include "Vertices.h"
 
