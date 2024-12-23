@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     Shader modelShader("../res/shaders/modeling/model.vert", "../res/shaders/modeling/model.frag", "");
 
     stbi_set_flip_vertically_on_load(1);
-    Model backpack("../res/textures/backpack/backpack.obj");
+    Model backpack("../res/textures/heart/12190_Heart_v1_L3.obj");
     stbi_set_flip_vertically_on_load(0);
 
     // VertexArray, VertexBuffer, IndexBuffer
@@ -121,6 +121,9 @@ int main(int argc, char **argv)
     Texture specularMap("../res/textures/container2_specular.png", false,
                         GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
     Texture emissionMap("../res/textures/matrix.jpg", false,
+                        GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
+
+    Texture heartMap("../res/textures/heart/texture_diffuse1.png", false, 
                         GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 0);
 
     diffuseMap.Bind(0);
@@ -354,7 +357,8 @@ int main(int argc, char **argv)
         modelShader.Bind();
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(3.0f, 0.0f, 7.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(0.1));
+        model = glm::rotate(model, -90.f, glm::vec3(1.0f, 1.0f, 1.0f));
         modelShader.SetUniformMat4("view", view);
         modelShader.SetUniformMat4("projection", proj);
         modelShader.SetUniformMat4("model", model);
@@ -384,6 +388,9 @@ int main(int argc, char **argv)
         modelShader.SetUniform3f("dirLight.ambient", {0.05f, 0.05f, 0.05f});
         modelShader.SetUniform3f("dirLight.diffuse", {0.4f, 0.4f, 0.4f});
         modelShader.SetUniform3f("dirLight.specular", {0.5f, 0.5f, 0.5f});
+
+        heartMap.Bind(0);
+        modelShader.SetUniform1i("texture_diffuse1", 0);
         backpack.Draw(modelShader);
 
         glDepthFunc(GL_LEQUAL);
